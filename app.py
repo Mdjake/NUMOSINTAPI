@@ -7,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)  # Enables CORS for all routes
 
-API_KEY = "ShadowWarThunder"
+API_KEY = "Newapiofnum567unlimyXy52vG7vF6aM8cny74Vz8jfe6Hs"
 BASE_URL = "https://numapi-production.up.railway.app/search"
 
 @app.route('/', methods=['GET'])

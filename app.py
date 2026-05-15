@@ -8,8 +8,8 @@ import os
 app = Flask(__name__)
 CORS(app)  # Enables CORS for all routes
 
-# Read API_KEY from environment variable, fallback to default if not set
-API_KEY = os.getenv('API_KEY', 'Newapiofnum567unlimyXy52vG7vF6aM8cny74Vz8jfe6Hs')
+# Read API_KEY from environment variable (REQUIRED)
+API_KEY = os.getenv('API_KEY')
 BASE_URL = "https://numapi-production.up.railway.app/search"
 
 @app.route('/', methods=['GET'])
@@ -18,7 +18,7 @@ def home():
         'service': 'GHOST PROXY API',
         'status': 'active',
         'endpoints': {
-            '/api/lookup': 'GET - Pass ?mobile=10digitnumber&apikey=yourapikey (apikey optional, uses env variable if not provided)'
+            '/api/lookup': 'GET - Pass ?mobile=10digitnumber&apikey=yourapikey (apikey parameter required)'
         }
     })
 
@@ -29,8 +29,8 @@ def lookup():
         return jsonify({}), 200
     
     mobile = request.args.get('mobile', '')
-    # Use provided apikey parameter, fallback to environment API_KEY
-    apikey = request.args.get('apikey', API_KEY)
+    # API key from query parameter - REQUIRED
+    provided_apikey = request.args.get('apikey', '')
     
     # Clean mobile number - keep only digits
     mobile = re.sub(r'\D', '', mobile)
@@ -44,15 +44,22 @@ def lookup():
         }), 400
     
     # Validate API key is provided
-    if not apikey:
+    if not provided_apikey:
         return jsonify({
             'success': False,
-            'error': 'API key is required - pass ?apikey=yourapikey or set API_KEY environment variable'
+            'error': 'API key is required - pass ?apikey=yourapikey'
         }), 401
     
+    # Validate API key matches environment variable
+    if provided_apikey != API_KEY:
+        return jsonify({
+            'success': False,
+            'error': 'Invalid API key'
+        }), 403
+    
     try:
-        # Call the original API
-        target_url = f"{BASE_URL}?api_key={apikey}&mobile={mobile}"
+        # Call the original API with the correct key
+        target_url = f"{BASE_URL}?api_key={API_KEY}&mobile={mobile}"
         print(f"[LOG] Calling: {target_url}")
         
         response = requests.get(target_url, timeout=30)

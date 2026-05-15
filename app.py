@@ -8,18 +8,29 @@ import os
 app = Flask(__name__)
 CORS(app)  # Enables CORS for all routes
 
-# Read API_KEY from environment variable (REQUIRED)
-API_KEY = os.getenv('API_KEY')
-BASE_URL = "https://numapi-production.up.railway.app/search"
+# ========== CONFIGURATION ==========
+# Your PROXY API key (for clients to use YOUR API)
+# Set this via environment variable: export PROXY_API_KEY="your-secret-key-here"
+PROXY_API_KEY = os.getenv('PROXY_API_KEY', 'GHOST-PROXY-KEY-2024')  # Default for testing
+
+# Main NUM-API key (hardcoded as you provided)
+MAIN_API_KEY = "Newapiofnum567unlimyXy52vG7vF6aM8cny74Vz8jfe6Hs"
+MAIN_API_URL = "http://numapi-production.up.railway.app/search"
+
+print(f"[INFO] Proxy API Key: {PROXY_API_KEY}")
+print(f"[INFO] Main API URL: {MAIN_API_URL}")
+# ===================================
 
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({
         'service': 'GHOST PROXY API',
         'status': 'active',
+        'version': '2.0',
         'endpoints': {
-            '/api/lookup': 'GET - Pass ?mobile=10digitnumber&apikey=yourapikey (apikey parameter required)'
-        }
+            '/api/lookup': 'GET - Pass ?mobile=10digitnumber&apikey=YOUR_PROXY_KEY'
+        },
+        'auth_required': 'Use your own proxy API key (not the main NUM-API key)'
     })
 
 @app.route('/api/lookup', methods=['GET', 'OPTIONS'])
@@ -28,8 +39,8 @@ def lookup():
     if request.method == 'OPTIONS':
         return jsonify({}), 200
     
+    # Get parameters
     mobile = request.args.get('mobile', '')
-    # API key from query parameter - REQUIRED
     provided_apikey = request.args.get('apikey', '')
     
     # Clean mobile number - keep only digits
@@ -43,24 +54,26 @@ def lookup():
             'provided': request.args.get('mobile', '')
         }), 400
     
-    # Validate API key is provided
+    # Validate YOUR proxy API key
     if not provided_apikey:
         return jsonify({
             'success': False,
-            'error': 'API key is required - pass ?apikey=yourapikey'
+            'error': 'Your proxy API key is required - pass ?apikey=YOUR_PROXY_KEY',
+            'note': 'This is your key for my proxy API, not the main NUM-API key'
         }), 401
     
-    # Validate API key matches environment variable
-    if provided_apikey != API_KEY:
+    if provided_apikey != PROXY_API_KEY:
         return jsonify({
             'success': False,
-            'error': 'Invalid API key'
+            'error': 'Invalid proxy API key',
+            'hint': 'Contact admin to get valid proxy API key'
         }), 403
     
     try:
-        # Call the original API with the correct key
-        target_url = f"{BASE_URL}?api_key={API_KEY}&mobile={mobile}"
-        print(f"[LOG] Calling: {target_url}")
+        # Call the main NUM-API with THEIR key (hardcoded above)
+        target_url = f"{MAIN_API_URL}?api_key={MAIN_API_KEY}&mobile={mobile}"
+        print(f"[LOG] Proxying request for mobile: {mobile}")
+        print(f"[LOG] Calling: {MAIN_API_URL}?api_key=***&mobile={mobile}")
         
         response = requests.get(target_url, timeout=30)
         response.raise_for_status()
@@ -69,11 +82,12 @@ def lookup():
         
         # Wrap the response with proxy info
         result = {
+            'success': True,
             'proxy_status': 'active',
-            'proxy_service': 'GHOST-PROXY v1.0',
+            'proxy_service': 'GHOST-PROXY v2.0',
             'proxy_timestamp': datetime.now().isoformat(),
             'target_mobile': mobile,
-            'api_response': data
+            'data': data  # Changed from 'api_response' to 'data' for cleaner response
         }
         
         return jsonify(result)
@@ -91,7 +105,7 @@ def lookup():
     except requests.exceptions.HTTPError as e:
         return jsonify({
             'success': False,
-            'error': f'API returned error: {str(e)}'
+            'error': f'Main API returned error: {str(e)}'
         }), response.status_code
     except Exception as e:
         return jsonify({

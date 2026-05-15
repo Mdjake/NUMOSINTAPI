@@ -3,11 +3,13 @@ from flask_cors import CORS
 import requests
 import re
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 CORS(app)  # Enables CORS for all routes
 
-API_KEY = "Newapiofnum567unlimyXy52vG7vF6aM8cny74Vz8jfe6Hs"
+# Read API_KEY from environment variable, fallback to default if not set
+API_KEY = os.getenv('API_KEY', 'Newapiofnum567unlimyXy52vG7vF6aM8cny74Vz8jfe6Hs')
 BASE_URL = "https://numapi-production.up.railway.app/search"
 
 @app.route('/', methods=['GET'])
@@ -16,7 +18,7 @@ def home():
         'service': 'GHOST PROXY API',
         'status': 'active',
         'endpoints': {
-            '/api/lookup': 'GET - Pass ?mobile=10digitnumber'
+            '/api/lookup': 'GET - Pass ?mobile=10digitnumber&apikey=yourapikey (apikey optional, uses env variable if not provided)'
         }
     })
 
@@ -27,6 +29,9 @@ def lookup():
         return jsonify({}), 200
     
     mobile = request.args.get('mobile', '')
+    # Use provided apikey parameter, fallback to environment API_KEY
+    apikey = request.args.get('apikey', API_KEY)
+    
     # Clean mobile number - keep only digits
     mobile = re.sub(r'\D', '', mobile)
     
@@ -38,9 +43,16 @@ def lookup():
             'provided': request.args.get('mobile', '')
         }), 400
     
+    # Validate API key is provided
+    if not apikey:
+        return jsonify({
+            'success': False,
+            'error': 'API key is required - pass ?apikey=yourapikey or set API_KEY environment variable'
+        }), 401
+    
     try:
         # Call the original API
-        target_url = f"{BASE_URL}?api_key={API_KEY}&mobile={mobile}"
+        target_url = f"{BASE_URL}?api_key={apikey}&mobile={mobile}"
         print(f"[LOG] Calling: {target_url}")
         
         response = requests.get(target_url, timeout=30)

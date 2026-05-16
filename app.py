@@ -98,7 +98,7 @@ async def lookup(
             "API_timestamp":
                 datetime.now().isoformat(),
             "target_mobile": mobile,
-            "data": data[result]
+            "data": data["result"]
         }
 
         return result

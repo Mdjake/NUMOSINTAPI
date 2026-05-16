@@ -93,12 +93,12 @@ async def lookup(
         # CUSTOM RESULT
         result = {
             "success": True,
-            "proxy_status": "active",
-            "proxy_service": "GHOST-PROXY v2.0",
-            "proxy_timestamp":
+            "status": "active",
+            "service": "GHOST-API v2.0",
+            "API_timestamp":
                 datetime.now().isoformat(),
             "target_mobile": mobile,
-            "data": data
+            "data": data[result]
         }
 
         return result

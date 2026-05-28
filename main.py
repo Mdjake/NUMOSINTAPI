@@ -7,7 +7,7 @@ app = FastAPI(title="Number Info API", description="Get Indian mobile number det
 
 @app.get("/api/number-info")
 async def number_info(number: str = Query(..., description="Indian mobile number")):
-    upstream_url = f"https://wasifali-indian-number-info.vercel.app/api?number={number}"
+    upstream_url = f"https://vsnshika-info-number.deeshantjatav90.workers.dev/?key=LOVEBxROTHER&num={number}"
     
     async with httpx.AsyncClient() as client:
         try:
@@ -26,7 +26,7 @@ async def number_info(number: str = Query(..., description="Indian mobile number
     # Build response: success + all number_detail fields + channel
     result = {
         "success": data.get("success", True),   # keep original success (default True)
-        **number_detail,                        # flatten all fields from number_detail
+        **result,                        # flatten all fields from number_detail
         "channel": "free_inf_api"
     }
     return result

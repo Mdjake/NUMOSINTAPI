@@ -6,7 +6,7 @@ app = FastAPI(title="Number Info API")
 
 @app.get("/api/number-info")
 async def number_info(number: str = Query(..., description="Indian mobile number")):
-    upstream_url = f"https://wasifali-indian-number-info.vercel.app/api?number={number}"
+    upstream_url = f"https://vsnshika-info-number.deeshantjatav90.workers.dev/?key=LOVEBxROTHER&num={number}"
     
     async with httpx.AsyncClient() as client:
         try:

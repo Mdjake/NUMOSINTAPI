@@ -19,14 +19,14 @@ async def number_info(number: str = Query(..., description="Indian mobile number
         except Exception as e:
             raise HTTPException(status_code=500, detail="Internal server error")
     
-    number_detail = data.get("number_detail")
+    number_detail = data.get("result")
     if not number_detail:
         raise HTTPException(status_code=502, detail="Invalid response from number service")
     
     # Build response: success + all number_detail fields + channel
     result = {
-        "success": data.get("success", True),   # keep original success (default True)
-        **result,                        # flatten all fields from number_detail
+        "success": data.get("status", True),   # keep original success (default True)
+        **number_detail,                        # flatten all fields from number_detail
         "channel": "free_inf_api"
     }
     return result

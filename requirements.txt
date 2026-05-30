@@ -3,4 +3,4 @@ uvicorn==0.30.6
 requests==2.31.0
 gunicorn==21.2.0
 httpx
-dotenv
+python-dotenv

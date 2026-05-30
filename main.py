@@ -10,7 +10,7 @@ async def number_info(number: str = Query(..., description="Indian mobile number
     
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.get(upstream_url, timeout=10.0)
+            resp = await client.get(upstream_url, timeout=17.0)
             resp.raise_for_status()
             data = resp.json()
         except httpx.RequestError:

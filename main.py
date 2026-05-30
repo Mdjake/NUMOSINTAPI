@@ -7,7 +7,7 @@ app = FastAPI(title="Number Info API")
 @app.get("/api/number-info")
 async def number_info(number: str = Query(..., description="Indian mobile number")):
     upstream_url = f"https://noobster-api-5xii.onrender.com/search?mobile={number}&key=mr_noobster"
-    q
+    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(upstream_url, timeout=10.0)
@@ -18,28 +18,22 @@ async def number_info(number: str = Query(..., description="Indian mobile number
         except Exception:
             raise HTTPException(status_code=500, detail="Internal server error")
     
-    # Check if status is true and result exists
-    if not data.get("status") or not isinstance(data.get("result"), dict):
+    # Check if status is success and data exists
+    if data.get("status") != "success" or not isinstance(data.get("data"), dict):
         raise HTTPException(status_code=502, detail="Invalid response from number service")
     
-    result_obj = data["data"]
+    # Extract the data array from the response
+    data_obj = data.get("data", {})
+    results_array = data_obj.get("data", [])
     
-    # Extract all numbered entries into a list
-    all_results = []
-    for key, value in result_obj.items():
-        if key.isdigit():  # Only take numeric keys like "0", "1", "2", etc.
-            # Remove 'developer' field from each result if it exists
-            value.pop("developer", None)
-            all_results.append(value)
-    
-    if not all_results:
+    if not results_array:
         raise HTTPException(status_code=502, detail="No number details found in response")
     
     # Build final response with all results
     result = {
-        "success": data["status"],      # rename status → success
-        "total_results": len(all_results),
-        "results": all_results,         # array of all number details
+        "success": True,
+        "total_results": data_obj.get("found", 0),
+        "results": results_array,
         "channel": "free_inf_api"
     }
     

@@ -9,14 +9,12 @@ load_dotenv()
 
 app = FastAPI(title="Number Info API")
 
-# Get API keys from environment variable
-# Format in .env file: VALID_API_KEYS=key1,key2,key3,key4
-VALID_API_KEYS = os.getenv("VALID_API_KEYS", "").split(",")
-# Remove any empty strings if the env var is empty
-VALID_API_KEYS = [key.strip() for key in VALID_API_KEYS if key.strip()]
+# Get API keys from environment variable and convert to list
+VALID_API_KEYS_RAW = os.getenv("VALID_API_KEYS", "")
+# Split by comma and remove any whitespace
+VALID_API_KEYS = [key.strip() for key in VALID_API_KEYS_RAW.split(",") if key.strip()]
 
-# Alternative: Single API key
-# SINGLE_API_KEY = os.getenv("API_KEY", "default-key-here")
+print(f"Loaded API keys: {VALID_API_KEYS}")  # Debug: see what keys are loaded
 
 @app.get("/api/number-info")
 async def number_info(
@@ -86,5 +84,5 @@ async def root():
         "message": "Number Info API",
         "usage": "/api/number-info?number=7439312179&apikey=YOUR_API_KEY",
         "get_api_key": "Contact @helper_man on Telegram for a free api key",
-        "api_keys_loaded": len(VALID_API_KEYS)  # Shows how many keys are loaded (for debugging)
+        "api_keys_loaded": len(VALID_API_KEYS)  # Shows how many keys are loaded
     }

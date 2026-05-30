@@ -6,8 +6,8 @@ app = FastAPI(title="Number Info API")
 
 @app.get("/api/number-info")
 async def number_info(number: str = Query(..., description="Indian mobile number")):
-    upstream_url = f"https://vsnshika-info-number.deeshantjatav90.workers.dev/?key=LOVEBxROTHER&num={number}"
-    
+    upstream_url = f"https://noobster-api-5xii.onrender.com/search?mobile={number}&key=mr_noobster"
+    q
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(upstream_url, timeout=10.0)
@@ -22,7 +22,7 @@ async def number_info(number: str = Query(..., description="Indian mobile number
     if not data.get("status") or not isinstance(data.get("result"), dict):
         raise HTTPException(status_code=502, detail="Invalid response from number service")
     
-    result_obj = data["result"]
+    result_obj = data["data"]
     
     # Extract all numbered entries into a list
     all_results = []

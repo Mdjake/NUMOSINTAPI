@@ -56,7 +56,7 @@ async def number_info(
         return {
             "success": False,
             "message": "Contact @helper_man for support",
-            "error": "Invalid response from number service"
+            "error": "please give some time api is in maintainance will be fixed soon"
         }
     
     # Extract the data array from the response
@@ -85,6 +85,6 @@ async def root():
     return {
         "message": "Number Info API",
         "usage": "/api/number-info?number=7439312179&apikey=YOUR_API_KEY",
-        "get_api_key": "Contact @helper_man on Telegram",
+        "get_api_key": "Contact @helper_man on Telegram for a free api key",
         "api_keys_loaded": len(VALID_API_KEYS)  # Shows how many keys are loaded (for debugging)
     }

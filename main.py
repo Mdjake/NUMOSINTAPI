@@ -12,16 +12,43 @@ app = FastAPI(title="Number Info API")
 
 # Get API keys from environment variable and convert to list
 VALID_API_KEYS_RAW = os.getenv("VALID_API_KEYS", "")
-# Split by comma and remove any whitespace
 VALID_API_KEYS = [key.strip() for key in VALID_API_KEYS_RAW.split(",") if key.strip()]
 
 print(f"Loaded API keys: {VALID_API_KEYS}")
 
-# Internal API configuration (hidden from users)
+# Internal API configuration
 INTERNAL_PRIMARY_API = "https://number-to-api-team-only.vercel.app/api/index.js"
 INTERNAL_PRIMARY_KEY = "team6months"
 INTERNAL_BACKUP_API = "https://noobster-api-5xii.onrender.com/search"
 INTERNAL_BACKUP_KEY = "mr_noobster"
+
+def transform_to_unified_format(data: dict, number: str, source: str) -> dict:
+    """Transform any API response to unified @helper_man format"""
+    
+    if source == "primary":
+        # Extract results from primary API
+        results = data.get("results", [])
+        return {
+            "status": "success",
+            "developer": "@helper_man",  # Override original developer
+            "queried_number": number,
+            "timestamp": datetime.now().isoformat() + "Z",
+            "results": results
+        }
+    
+    elif source == "backup":
+        # Extract from backup API's nested structure
+        data_obj = data.get("data", {})
+        results = data_obj.get("data", [])
+        return {
+            "status": "success",
+            "developer": "@helper_man",
+            "queried_number": number,
+            "timestamp": datetime.now().isoformat() + "Z",
+            "results": results
+        }
+    
+    return None
 
 async def fetch_from_internal_primary(number: str):
     """Internal: Fetch from primary data source"""
@@ -34,7 +61,9 @@ async def fetch_from_internal_primary(number: str):
             data = resp.json()
             
             if data.get("status") == "success" and data.get("results"):
-                return {"success": True, "data": data}
+                # Transform primary response to unified format
+                unified = transform_to_unified_format(data, number, "primary")
+                return {"success": True, "data": unified}
             return {"success": False}
         except Exception:
             return {"success": False}
@@ -54,15 +83,9 @@ async def fetch_from_internal_backup(number: str):
                 results_array = data_obj.get("data", [])
                 
                 if results_array:
-                    # Transform to match original format
-                    transformed_data = {
-                        "status": "success",
-                        "developer": "@helper_man",
-                        "queried_number": number,
-                        "timestamp": datetime.now().isoformat() + "Z",
-                        "results": results_array
-                    }
-                    return {"success": True, "data": transformed_data}
+                    # Transform backup response to unified format
+                    unified = transform_to_unified_format(data, number, "backup")
+                    return {"success": True, "data": unified}
             return {"success": False}
         except Exception:
             return {"success": False}
@@ -99,7 +122,7 @@ async def number_info(
             "timestamp": datetime.now().isoformat() + "Z"
         }
     
-    # Return success response (no source information exposed)
+    # Return unified response
     return result["data"]
 
 @app.get("/")

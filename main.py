@@ -17,7 +17,7 @@ VALID_API_KEYS = [key.strip() for key in VALID_API_KEYS_RAW.split(",") if key.st
 print(f"Loaded API keys: {VALID_API_KEYS}")
 
 # Internal API configuration
-INTERNAL_PRIMARY_API = "https://number-to-api-team-only.vercel.app/api/indx.js"
+INTERNAL_PRIMARY_API = "https://number-to-api-team-only.vercel.app/api/index.js"
 INTERNAL_PRIMARY_KEY = "team6months"
 INTERNAL_BACKUP_API = "https://noobster-api-5xii.onrender.com/search"
 INTERNAL_BACKUP_KEY = "mr_noobster"
